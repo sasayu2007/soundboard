@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#111111">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Sound Board</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; min-height: 100vh; background: #111; color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      display: flex; flex-direction: column;
+      padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:14px; }
+    h1 { font-size:20px; margin:0; }
+    #status { font-size:12px; color:#aaa; text-align:right; min-height:1em; }
+    .grid { flex:1; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .sound-button {
+      border:0; border-radius:18px; background:#2b2b2b; color:white;
+      font-size:20px; font-weight:700; padding:18px 10px; min-height:100px;
+      box-shadow:0 3px 0 #080808; touch-action:manipulation;
+    }
+    .sound-button:active { transform:translateY(3px); box-shadow:none; background:#444; }
+    .stop {
+      margin-top:12px; width:100%; min-height:58px; border:0; border-radius:16px;
+      background:#7a2020; color:white; font-size:18px; font-weight:700;
+      touch-action:manipulation;
+    }
+    @media (orientation: landscape) {
+      .grid { grid-template-columns:repeat(5,minmax(0,1fr)); }
+      .sound-button { min-height:110px; font-size:17px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sound Board</h1>
+    <div id="status"></div>
+  </header>
+
+  <main class="grid">
+      <button class="sound-button" data-index="0" aria-label="ﾌｧﾝﾌｧﾝﾌｧﾝ"><span>ﾌｧﾝﾌｧﾝﾌｧﾝ</span></button>
+      <button class="sound-button" data-index="1" aria-label="ﾋﾟﾛﾋﾟﾛ"><span>ﾋﾟﾛﾋﾟﾛ</span></button>
+      <button class="sound-button" data-index="2" aria-label="爆発"><span>爆発</span></button>
+      <button class="sound-button" data-index="3" aria-label="ｴﾅﾝﾃﾞ"><span>ｴﾅﾝﾃﾞ</span></button>
+      <button class="sound-button" data-index="4" aria-label="ｴ"><span>ｴ</span></button>
+      <button class="sound-button" data-index="5" aria-label="終わりです"><span>終わりです</span></button>
+      <button class="sound-button" data-index="6" aria-label="ｵﾜﾘﾃﾞｽｩ"><span>ｵﾜﾘﾃﾞｽｩ</span></button>
+      <button class="sound-button" data-index="7" aria-label="ﾅﾆｦｼﾃﾝﾉｳ"><span>ﾅﾆｦｼﾃﾝﾉｳ</span></button>
+      <button class="sound-button" data-index="8" aria-label="ｴｪ~~ｪ"><span>ｴｪ~~ｪ</span></button>
+      <button class="sound-button" data-index="9" aria-label="ｳｿﾃﾞｽｩ"><span>ｳｿﾃﾞｽｩ</span></button>
+  </main>
+
+  <button class="stop" id="stop">■ 停止</button>
+
+  <script>
+    const sounds = [
+    new Audio("audio/ﾌｧﾝﾌｧﾝﾌｧﾝ.wav"),
+    new Audio("audio/ﾋﾟﾛﾋﾟﾛ.wav"),
+    new Audio("audio/爆発.wav"),
+    new Audio("audio/ｴﾅﾝﾃﾞ.wav"),
+    new Audio("audio/ｴ.wav"),
+    new Audio("audio/終わりです.wav"),
+    new Audio("audio/ｵﾜﾘﾃﾞｽｩ.wav"),
+    new Audio("audio/ﾅﾆｦｼﾃﾝﾉｳ.wav"),
+    new Audio("audio/ｴｪ~~ｪ.wav"),
+    new Audio("audio/ｳｿﾃﾞｽｩ.wav")
+    ];
+
+    const status = document.getElementById("status");
+    let current = null;
+
+    function stopCurrent() {
+      if (current) {
+        current.pause();
+        current.currentTime = 0;
+        current = null;
+      }
+      status.textContent = "";
+    }
+
+    document.querySelectorAll(".sound-button").forEach((button, i) => {
+      button.addEventListener("click", () => {
+        stopCurrent();
+        const audio = sounds[i];
+        audio.currentTime = 0;
+        current = audio;
+        status.textContent = button.innerText + " 再生中";
+        audio.play().catch(err => {
+          status.textContent = "再生できませんでした";
+          console.error(err);
+        });
+        audio.onended = () => {
+          if (current === audio) {
+            current = null;
+            status.textContent = "";
+          }
+        };
+      });
+    });
+
+    document.getElementById("stop").addEventListener("click", stopCurrent);
+  </script>
+</body>
+</html>
